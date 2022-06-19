@@ -187,6 +187,8 @@ class AppWindow (qtw.QMainWindow, MyFont):
         self.pushButton.setObjectName("pushButton")
 
         self.pushButton2 = qtw.QPushButton("Show pixel info")
+        self.pushButton2.setCheckable(True)
+        self.pushButton2.setChecked(False)
         self.pushButton2.clicked.connect(self.SceneDragMode)
         self.pushButton2.setObjectName("pushButton2")
 
@@ -314,13 +316,13 @@ class AppWindow (qtw.QMainWindow, MyFont):
 
             if image == None:
                 image = cv.imread('temp_image.png')
+                valueblue = image[pos.y(),pos.x(),0]
+                valuegreen = image[pos.y(),pos.x(),1]
+                valuered = image[pos.y(),pos.x(),2]
             else:
                 pass
 
-            xline = pos.x()
-            yline = pos.y()
-
-            self.pixValueInfo.setText('%d, %d' % (xline,yline))
+            self.pixValueInfo.setText('%d, %d, %d' % (valuegreen,valueblue,valuered))
 
 
     def addRoiLable(self, pos):
