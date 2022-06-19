@@ -1,0 +1,9 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+    <qresource prefix="icons">
+        <file alias="drag.png">drag.png</file>
+        <file alias="fit.png">fit.png</file>
+        <file alias="clock.png">clock.png</file>
+        <file alias="anticlock.png">anticlock.png</file>
+    </qresource>
+</RCC> 
