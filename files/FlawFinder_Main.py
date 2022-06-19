@@ -214,7 +214,7 @@ class AppWindow (qtw.QMainWindow, MyFont):
         self.box2.setTitle("Based operations")
         self.box2.setFont(self.calibri_12)
 
-        self.pushButton3 = qtw.QPushButton("Show Grayscale3")
+        self.pushButton3 = qtw.QPushButton("Draw description")
         self.pushButton3.setCheckable(True)
         self.pushButton3.setChecked(False)
         self.pushButton3.setObjectName("pushButton3")
