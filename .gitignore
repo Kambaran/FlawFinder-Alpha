@@ -1,0 +1,11 @@
+# IGNORE FORLDERS
+
+*.vscode/
+
+# IGNORE FILES
+
+*files/temp_image.png
+*files/test.py
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
