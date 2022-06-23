@@ -1,4 +1,5 @@
 import sys
+import PyQt5
 import cv2 as cv
 import qdarktheme
 import numpy as np
@@ -12,6 +13,8 @@ from PyQt5 import QtCore as qtc
 import ToolButtons
 
 # Fonts
+
+
 class MyFont(object):
 
     def __init__(self):
@@ -31,6 +34,8 @@ class MyFont(object):
         self.calibri_12.setWeight(65)
 
 # Image Viewer
+
+
 class ImageViewer(qtw.QGraphicsView):
     photoClicked = qtc.pyqtSignal(qtc.QPoint)
 
@@ -58,7 +63,7 @@ class ImageViewer(qtw.QGraphicsView):
             self.setSceneRect(rect)
             if self.hasPhoto():
                 unity = self.transform().mapRect(qtc.QRectF(0, 0, 1, 1))
-                self.scale(1 / unity.width(), 1 / unity.height()) 
+                self.scale(1 / unity.width(), 1 / unity.height())
                 viewrect = self.viewport().rect()
                 scenerect = self.transform().mapRect(rect)
                 factor = min(viewrect.width() / scenerect.width(),
@@ -104,10 +109,14 @@ class ImageViewer(qtw.QGraphicsView):
             self.photoClicked.emit(self.mapToScene(event.pos()).toPoint())
         super(ImageViewer, self).mousePressEvent(event)
 
+
+
 # Main Aplication Class
+
+
 class AppWindow (qtw.QMainWindow, MyFont):
 
-    operations_table = ['x','y']
+    operations_table = ['x', 'y']
 
     # UI Settings
     def __init__(self):
@@ -115,26 +124,26 @@ class AppWindow (qtw.QMainWindow, MyFont):
 
         # Main Window
         self.setWindowTitle("Flow Finder")
-        self.resize(1920,1080)
+        self.resize(1920, 1080)
         self.main_dispaly = qtw.QWidget()
 
         """Create Display and Docks"""
         # Image Display
         self.image_dispaly = ImageViewer(self)
-        self.image_dispaly.setGeometry(qtc.QRect(0 ,0, 40, 100))
+        self.image_dispaly.setGeometry(qtc.QRect(0, 0, 40, 100))
         self.image_dispaly.photoClicked.connect(self.photoClicked)
         self.image_dispaly.photoClicked.connect(self.addRoiLable)
 
-        # Tool Panel - Dock Construct 
+        # Tool Panel - Dock Construct
         self.tool_panel = qtw.QToolBox()
         self.tool_panel.setObjectName("ToolBox")
-        self.tool_panel.setEnabled(True)     
+        self.tool_panel.setEnabled(True)
         self.tool_panel.setFont(self.calibri_16)
 
         # List Display - Dock Construct
         self.operations = qtw.QTableView()
         self.operations.setObjectName("Operations Table")
-        self.operations.setEnabled(True)  
+        self.operations.setEnabled(True)
 
         # Tool Panel - Page 1
         self.page_1 = qtw.QWidget()
@@ -171,7 +180,7 @@ class AppWindow (qtw.QMainWindow, MyFont):
 
         # Main Layout
         #layout = qtw.QGridLayout()
-        #self.setLayout(layout)
+        # self.setLayout(layout)
 
         """Boxes, Buttons, Sliders, etc."""
         # Page 1 Boxes
@@ -181,7 +190,7 @@ class AppWindow (qtw.QMainWindow, MyFont):
         self.color_box.setObjectName("color box")
         self.color_box.setTitle("Color based operations")
         self.color_box.setFont(self.calibri_12)
-        
+
         self.pushButton = qtw.QPushButton("Aply Grayscale")
         self.pushButton.clicked.connect(self.convertToGray)
         self.pushButton.setObjectName("pushButton")
@@ -232,7 +241,7 @@ class AppWindow (qtw.QMainWindow, MyFont):
         self.page_1_grid = qtw.QGridLayout(self.page_1)
         self.page_1_grid.setObjectName("Page 1 Grid")
         self.page_1_grid.addWidget(self.color_box, 1, 1)
-        self.page_1_grid.addWidget(self.box2,2,1)
+        self.page_1_grid.addWidget(self.box2, 2, 1)
 
         # Menubar Construct
         menubar = self.menuBar()
@@ -241,20 +250,40 @@ class AppWindow (qtw.QMainWindow, MyFont):
         file_menu.addAction('Open', self.openFile)
         file_menu.addAction('Save')
         file_menu.addSeparator()
-        file_menu.addAction('Exit',self.close)
+        file_menu.addAction('Exit', self.close)
         file_menu = menubar.addMenu("Help")
         file_menu.addAction("Get Started")
         file_menu.addSeparator()
-        file_menu.addAction("About") 
+        file_menu.addAction("About")
 
-        self.BuildToolbar()        
+        self.BuildToolbar()
 
         # End UI code
         self.show()
 
+    def paintEvent(self, event):
+        qp = qtg.QPainter()
+        qp.begin(self)
+        self.drawRectangles(qp)
+        qp.end()
+
+    def drawRectangles(self, qp):
+        col = qtg.QColor(0, 0, 0)
+        col.setNamedColor('#d4d4d4')
+        qp.setPen(col)
+
+        qp.setBrush(qtg.QColor(200, 0, 0))
+        qp.drawRect(10, 15, 90, 60)
+
+        qp.setBrush(qtg.QColor(255, 80, 0, 160))
+        qp.drawRect(130, 15, 90, 60)
+
+        qp.setBrush(qtg.QColor(25, 0, 90, 200))
+        qp.drawRect(250, 15, 90, 60)
+
     # Tool Bar
     def BuildToolbar(self):
-        
+
         # Call Buttons
         fitbutton = ToolButtons._fininview
         fitbutton.clicked.connect(self.FitImage)
@@ -266,7 +295,7 @@ class AppWindow (qtw.QMainWindow, MyFont):
         rotatebutton.clicked.connect(self.RotateClockwise)
 
         rotateantibutton = ToolButtons._rotateanticlockbutton
-        rotateantibutton.clicked.connect(self.RotateAntiClockwise)    
+        rotateantibutton.clicked.connect(self.RotateAntiClockwise)
 
         # Add Buttons
         toolbar = qtw.QToolBar()
@@ -282,7 +311,8 @@ class AppWindow (qtw.QMainWindow, MyFont):
 
     # Menu - File - Open
     def openFile(self):
-        fname = qtw.QFileDialog.getOpenFileName(self, 'Choose image', 'c:\\','Image files (*.png *.jpg *.jpeg)')
+        fname = qtw.QFileDialog.getOpenFileName(
+            self, 'Choose image', 'c:\\', 'Image files (*.png *.jpg *.jpeg)')
         if not fname[0]:
             pass
         else:
@@ -291,10 +321,10 @@ class AppWindow (qtw.QMainWindow, MyFont):
             if fname[0].lower().endswith(('.tiff', '.bmp')):
                 sys.exit()
             self.image_dispaly.setPhoto(qtg.QPixmap(fname[0]))
-    
+
     # Grayscale Conversion
     def convertToGray(self):
-        
+
         image = cv.imread('files/temp_image.png')
 
         if image == None:
@@ -306,32 +336,50 @@ class AppWindow (qtw.QMainWindow, MyFont):
         data = im.fromarray(image_RGB)
         data.save('temp_image.png')
         self.image_dispaly.setPhoto(qtg.QPixmap('temp_image.png'))
-        
+
     # Clicked
     def photoClicked(self, pos):
-        if self.image_dispaly.dragMode()  == qtw.QGraphicsView.NoDrag:
+        if self.image_dispaly.dragMode() == qtw.QGraphicsView.NoDrag:
             self.pixPosInfo.setText('%d, %d' % (pos.x(), pos.y()))
 
             image = None
 
             if image == None:
                 image = cv.imread('temp_image.png')
-                valueblue = image[pos.y(),pos.x(),0]
-                valuegreen = image[pos.y(),pos.x(),1]
-                valuered = image[pos.y(),pos.x(),2]
+                valueblue = image[pos.y(), pos.x(), 0]
+                valuegreen = image[pos.y(), pos.x(), 1]
+                valuered = image[pos.y(), pos.x(), 2]
             else:
                 pass
 
-            self.pixValueInfo.setText('%d, %d, %d' % (valuegreen,valueblue,valuered))
-
+            self.pixValueInfo.setText('%d, %d, %d' %
+                                      (valuegreen, valueblue, valuered))
 
     def addRoiLable(self, pos):
-        if self.image_dispaly.dragMode()  == qtw.QGraphicsView.NoDrag:     
+        flaw_frame = qtg.QPen()
+        flaw_frame.setStyle(qtc.Qt.DashLine)
+        flaw_frame.setWidth(3)
+        flaw_frame.setBrush(qtc.Qt.red)
+        flaw_frame.setCapStyle(qtc.Qt.RoundCap)
+        flaw_frame.setJoinStyle(qtc.Qt.RoundJoin)
+
+        flaw_description = qtg.QBrush()
+        flaw_description.setStyle(qtc.Qt.SolidPattern)
+        flaw_description.setColor(qtc.Qt.red)
+        #flaw_description
+        """
+        flaw_description.setStyle(qtc.Qt.DashLine)
+        flaw_description.setWidth(3)
+        flaw_description.setBrush(qtc.Qt.red)
+        flaw_description.setCapStyle(qtc.Qt.RoundCap)
+        flaw_description.setJoinStyle(qtc.Qt.RoundJoin)
+        """
+
+        if self.image_dispaly.dragMode() == qtw.QGraphicsView.NoDrag:
             if self.pushButton3.isChecked():
-                print("Hey")
-                print(pos.x(), pos.y())
-                print('%d, %d' % (pos.x(), pos.y()))
-                self.image_dispaly._scene.addRect(pos.x(),pos.y(),200,200)
+                self.image_dispaly._scene.addRect(pos.x()-100, pos.y()-100, 200, 200, flaw_frame)
+                self.image_dispaly._scene.addRect(pos.x()+100, pos.y()-100, 200, 200, qtg.QPen(),flaw_description)
+
 
     """Toolbar Functions"""
 
@@ -346,17 +394,17 @@ class AppWindow (qtw.QMainWindow, MyFont):
     # Scene - Rotate Right
     def RotateClockwise(self):
         self.image_dispaly.rotate(90)
-    
+
     # Secene - Rotate Left
     def RotateAntiClockwise(self):
         self.image_dispaly.rotate(-90)
- 
- 
+
+
 if __name__ == '__main__':
 
     app = qtw.QApplication(sys.argv)
-    app.setStyleSheet(qdarktheme.load_stylesheet("dark","rounded"))
+    app.setStyleSheet(qdarktheme.load_stylesheet("dark", "rounded"))
 
     FF = AppWindow()
-  
+
     sys.exit(app.exec())
