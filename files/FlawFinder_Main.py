@@ -1,6 +1,6 @@
 import sys
-import PyQt5
 import cv2 as cv
+from matplotlib import image
 import qdarktheme
 import numpy as np
 
@@ -38,6 +38,7 @@ class MyFont(object):
 
 class ImageViewer(qtw.QGraphicsView):
     photoClicked = qtc.pyqtSignal(qtc.QPoint)
+    clickRelesd = qtc.pyqtSignal(qtc.QPoint)
 
     def __init__(self, parent):
         super(ImageViewer, self).__init__(parent)
@@ -108,8 +109,12 @@ class ImageViewer(qtw.QGraphicsView):
         if self._photo.isUnderMouse():
             self.photoClicked.emit(self.mapToScene(event.pos()).toPoint())
         super(ImageViewer, self).mousePressEvent(event)
+    
+    def mouseReleaseEvent(self, event):
+        if self._photo.isUnderMouse():
+            self.clickRelesd.emit(self.mapToScene(event.pos()).toPoint())
 
-
+        return super().mouseReleaseEvent(event)
 
 # Main Aplication Class
 
@@ -132,7 +137,7 @@ class AppWindow (qtw.QMainWindow, MyFont):
         self.image_dispaly = ImageViewer(self)
         self.image_dispaly.setGeometry(qtc.QRect(0, 0, 40, 100))
         self.image_dispaly.photoClicked.connect(self.photoClicked)
-        self.image_dispaly.photoClicked.connect(self.addRoiLable)
+        self.image_dispaly.clickRelesd.connect(self.addRoiLable)
 
         # Tool Panel - Dock Construct
         self.tool_panel = qtw.QToolBox()
@@ -192,13 +197,16 @@ class AppWindow (qtw.QMainWindow, MyFont):
         self.color_box.setFont(self.calibri_12)
 
         self.pushButton = qtw.QPushButton("Aply Grayscale")
-        self.pushButton.clicked.connect(self.convertToGray)
+        self.pushButton.clicked.connect(self.unCheck)
+        #self.pushButton.clicked.emit()        
+        self.pushButton.setChecked(True)
+        self.pushButton.setChecked(False)
         self.pushButton.setObjectName("pushButton")
 
         self.pushButton2 = qtw.QPushButton("Show pixel info")
+        self.pushButton2.clicked.connect(self.unCheck)
         self.pushButton2.setCheckable(True)
         self.pushButton2.setChecked(False)
-        self.pushButton2.clicked.connect(self.SceneDragMode)
         self.pushButton2.setObjectName("pushButton2")
 
         self.pixPosInfo = qtw.QLineEdit("Position Info")
@@ -224,12 +232,15 @@ class AppWindow (qtw.QMainWindow, MyFont):
         self.box2.setFont(self.calibri_12)
 
         self.pushButton3 = qtw.QPushButton("Draw description")
+        self.pushButton3.clicked.connect(self.unCheck)
         self.pushButton3.setCheckable(True)
         self.pushButton3.setChecked(False)
         self.pushButton3.setObjectName("pushButton3")
 
         self.pushButton4 = qtw.QPushButton("Show Grayscale4")
-        self.pushButton4.clicked.connect(self.convertToGray)
+        self.pushButton4.clicked.connect(self.unCheck)
+        self.pushButton4.setCheckable(True)
+        self.pushButton4.setChecked(False)
         self.pushButton4.setObjectName("pushButton4")
 
         self.box2_grid = qtw.QVBoxLayout()
@@ -248,7 +259,7 @@ class AppWindow (qtw.QMainWindow, MyFont):
         menubar.setFont(self.calibri_12)
         file_menu = menubar.addMenu('File')
         file_menu.addAction('Open', self.openFile)
-        file_menu.addAction('Save')
+        file_menu.addAction('Save', self.saveFile)
         file_menu.addSeparator()
         file_menu.addAction('Exit', self.close)
         file_menu = menubar.addMenu("Help")
@@ -258,16 +269,17 @@ class AppWindow (qtw.QMainWindow, MyFont):
 
         self.BuildToolbar()
 
+
         # End UI code
         self.show()
 
-    def paintEvent(self, event):
+    """def paintEvent(self,event):
         qp = qtg.QPainter()
         qp.begin(self)
-        self.drawRectangles(qp)
-        qp.end()
+        #self.image_dispaly.drawRectangles(qp)
+        
 
-    def drawRectangles(self, qp):
+    #def drawRectangles(self, qp):
         col = qtg.QColor(0, 0, 0)
         col.setNamedColor('#d4d4d4')
         qp.setPen(col)
@@ -280,8 +292,9 @@ class AppWindow (qtw.QMainWindow, MyFont):
 
         qp.setBrush(qtg.QColor(25, 0, 90, 200))
         qp.drawRect(250, 15, 90, 60)
-
+        qp.end()"""
     # Tool Bar
+
     def BuildToolbar(self):
 
         # Call Buttons
@@ -317,25 +330,64 @@ class AppWindow (qtw.QMainWindow, MyFont):
             pass
         else:
             data = im.fromarray(cv.imread(fname[0]))
-            data.save('temp_image.png')
+            data.save('temp_image_original.png')
             if fname[0].lower().endswith(('.tiff', '.bmp')):
                 sys.exit()
             self.image_dispaly.setPhoto(qtg.QPixmap(fname[0]))
 
+    # Menu - File - Save
+    def saveFile(self):
+        filePath, _ = qtw.QFileDialog.getSaveFileName(self, "Save Image", "",
+                                                      "PNG(*.png);;JPEG(*.jpg *.jpeg);;All Files(*.*) ")
+        if filePath == "":
+            return
+        pixmap = qtg.QPixmap(self.image_dispaly.viewport().size())
+        self.image_dispaly.viewport().render(pixmap)
+        pixmap.save(filePath)
+
     # Grayscale Conversion
     def convertToGray(self):
 
-        image = cv.imread('files/temp_image.png')
+        image = cv.imread('files/temp_image_original.png')
 
         if image == None:
-            image = cv.imread('temp_image.png')
+            image = cv.imread('temp_image_original.png')
         else:
             pass
 
         image_RGB = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
         data = im.fromarray(image_RGB)
-        data.save('temp_image.png')
-        self.image_dispaly.setPhoto(qtg.QPixmap('temp_image.png'))
+        data.save('temp_image_grayscale.png')
+        self.image_dispaly.setPhoto(qtg.QPixmap('temp_image_grayscale.png'))
+
+    def grabCut(self,pos):
+
+        if self.image_dispaly.dragMode() == qtw.QGraphicsView.NoDrag:
+            if self.pushButton4.isChecked():     
+                print(pos.x()-100, pos.y()-100, 200, 200)
+                image = cv.imread('temp_image_original.png')
+                #
+
+                img_ivert = cv.bitwise_not(image)
+                mask = np.zeros(img_ivert.shape[:2],np.uint8)
+
+                # Background and foreground models
+                bgdModel = np.zeros((1,65),np.float64)
+                fgdModel = np.zeros((1,65),np.float64)
+                # Rectangle of semi ROI - manual select 
+                rect = (pos.x()-100, pos.y()-100, 200, 200)
+
+                # start sectioning
+                cv.grabCut(img_ivert,mask,rect,bgdModel,fgdModel,20,cv.GC_INIT_WITH_RECT)
+
+                # Definite background and probable background 
+                mask2 = np.where((mask==2)|(mask==0),0,1).astype('uint8')
+                image_grabcut = img_ivert*mask2[:,:,np.newaxis]
+
+                #
+                data = im.fromarray(image_grabcut)
+                data.save('temp_image_grabcut.png')
+                self.image_dispaly.setPhoto(qtg.QPixmap('temp_image_grabcut.png'))
 
     # Clicked
     def photoClicked(self, pos):
@@ -343,19 +395,19 @@ class AppWindow (qtw.QMainWindow, MyFont):
             self.pixPosInfo.setText('%d, %d' % (pos.x(), pos.y()))
 
             image = None
+            image = cv.imread('temp_image_original.png')
 
-            if image == None:
-                image = cv.imread('temp_image.png')
+            if image.any():       
                 valueblue = image[pos.y(), pos.x(), 0]
                 valuegreen = image[pos.y(), pos.x(), 1]
                 valuered = image[pos.y(), pos.x(), 2]
+                self.pixValueInfo.setText('%d, %d, %d' %
+                                      (valuegreen, valueblue, valuered))
             else:
                 pass
 
-            self.pixValueInfo.setText('%d, %d, %d' %
-                                      (valuegreen, valueblue, valuered))
-
     def addRoiLable(self, pos):
+ 
         flaw_frame = qtg.QPen()
         flaw_frame.setStyle(qtc.Qt.DashLine)
         flaw_frame.setWidth(3)
@@ -366,19 +418,27 @@ class AppWindow (qtw.QMainWindow, MyFont):
         flaw_description = qtg.QBrush()
         flaw_description.setStyle(qtc.Qt.SolidPattern)
         flaw_description.setColor(qtc.Qt.red)
-        #flaw_description
-        """
-        flaw_description.setStyle(qtc.Qt.DashLine)
-        flaw_description.setWidth(3)
-        flaw_description.setBrush(qtc.Qt.red)
-        flaw_description.setCapStyle(qtc.Qt.RoundCap)
-        flaw_description.setJoinStyle(qtc.Qt.RoundJoin)
-        """
 
         if self.image_dispaly.dragMode() == qtw.QGraphicsView.NoDrag:
             if self.pushButton3.isChecked():
-                self.image_dispaly._scene.addRect(pos.x()-100, pos.y()-100, 200, 200, flaw_frame)
-                self.image_dispaly._scene.addRect(pos.x()+100, pos.y()-100, 200, 200, qtg.QPen(),flaw_description)
+                self.image_dispaly._scene.addRect(
+                    pos.x()-100, pos.y()-100, 200, 200, flaw_frame)
+                self.image_dispaly._scene.addRect(
+                    pos.x()+100, pos.y()-100, 200, 200, qtg.QPen(), flaw_description)
+
+                #
+                labelka = qtw.QGraphicsSimpleTextItem()
+                labelka.setPos(pos.x()+100, pos.y())
+                labelka.setText("Labelka")
+                self.image_dispaly._scene.addItem(labelka)
+    
+    def clickInteraction(self,pos):
+        pass
+    
+    def unCheck(self):
+        buttons = [self.pushButton,self.pushButton2,self.pushButton3,self.pushButton4]
+        for i in buttons:
+            i.setChecked(False)
 
 
     """Toolbar Functions"""
