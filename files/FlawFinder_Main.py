@@ -1,6 +1,5 @@
 import sys
 import cv2 as cv
-from matplotlib import image
 import qdarktheme
 import numpy as np
 
@@ -11,6 +10,8 @@ from PyQt5 import QtGui as qtg
 from PyQt5 import QtCore as qtc
 
 import ToolButtons
+from ToolPanel import ToolPanel
+
 
 # Fonts
 
@@ -109,7 +110,7 @@ class ImageViewer(qtw.QGraphicsView):
         if self._photo.isUnderMouse():
             self.photoClicked.emit(self.mapToScene(event.pos()).toPoint())
         super(ImageViewer, self).mousePressEvent(event)
-    
+
     def mouseReleaseEvent(self, event):
         if self._photo.isUnderMouse():
             self.clickRelesd.emit(self.mapToScene(event.pos()).toPoint())
@@ -121,7 +122,7 @@ class ImageViewer(qtw.QGraphicsView):
 
 class AppWindow (qtw.QMainWindow, MyFont):
 
-    operations_table = ['x', 'y']
+    _temporary_position = []
 
     # UI Settings
     def __init__(self):
@@ -137,33 +138,17 @@ class AppWindow (qtw.QMainWindow, MyFont):
         self.image_dispaly = ImageViewer(self)
         self.image_dispaly.setGeometry(qtc.QRect(0, 0, 40, 100))
         self.image_dispaly.photoClicked.connect(self.photoClicked)
+        self.image_dispaly.photoClicked.connect(self.grabCut)
         self.image_dispaly.clickRelesd.connect(self.addRoiLable)
 
-        # Tool Panel - Dock Construct
-        self.tool_panel = qtw.QToolBox()
-        self.tool_panel.setObjectName("ToolBox")
-        self.tool_panel.setEnabled(True)
-        self.tool_panel.setFont(self.calibri_16)
-
-        # List Display - Dock Construct
+        # List Display
         self.operations = qtw.QTableView()
         self.operations.setObjectName("Operations Table")
         self.operations.setEnabled(True)
 
-        # Tool Panel - Page 1
-        self.page_1 = qtw.QWidget()
-        self.page_1.setGeometry(qtc.QRect(0, 0, 0, 0))
-        self.page_1.setObjectName("Page 1")
-        #self.page_1_grid = qtw.QGridLayout(self.page)
-
-        # Tool Panel - Page 2
-        self.page_2 = qtw.QWidget()
-        self.page_2.setGeometry(qtc.QRect(0, 0, 0, 0))
-        self.page_2.setObjectName("Page 2")
-
-        # Tool Panel - Adding Pages
-        self.tool_panel.addItem(self.page_1, "Basic Operations")
-        self.tool_panel.addItem(self.page_2, "Algorithms")
+        # Tool Panel
+        self.tool_panel = ToolPanel()
+        self.tool_panel.setFont(self.calibri_16)
 
         # Left Dockable
         self.left_dock = qtw.QDockWidget("ToolBox", self)
@@ -186,19 +171,15 @@ class AppWindow (qtw.QMainWindow, MyFont):
         # Main Layout
         #layout = qtw.QGridLayout()
         # self.setLayout(layout)
-
         """Boxes, Buttons, Sliders, etc."""
-        # Page 1 Boxes
-
         # BOX 1
-        self.color_box = qtw.QGroupBox(self.page_1)
+        self.color_box = qtw.QGroupBox(self.tool_panel.toolbox_page["Image Information"])
         self.color_box.setObjectName("color box")
         self.color_box.setTitle("Color based operations")
         self.color_box.setFont(self.calibri_12)
 
         self.pushButton = qtw.QPushButton("Aply Grayscale")
         self.pushButton.clicked.connect(self.unCheck)
-        #self.pushButton.clicked.emit()        
         self.pushButton.setChecked(True)
         self.pushButton.setChecked(False)
         self.pushButton.setObjectName("pushButton")
@@ -226,19 +207,18 @@ class AppWindow (qtw.QMainWindow, MyFont):
         self.color_box.setLayout(self.color_box_grid)
 
         # BOX 2
-        self.box2 = qtw.QGroupBox(self.page_1)
+        self.box2 = qtw.QGroupBox(self.tool_panel.toolbox_page["Image Information"])
         self.box2.setObjectName("Box")
         self.box2.setTitle("Based operations")
         self.box2.setFont(self.calibri_12)
 
         self.pushButton3 = qtw.QPushButton("Draw description")
-        self.pushButton3.clicked.connect(self.unCheck)
+        self.pushButton3.clicked.connect(self.kMeans)
         self.pushButton3.setCheckable(True)
         self.pushButton3.setChecked(False)
         self.pushButton3.setObjectName("pushButton3")
 
-        self.pushButton4 = qtw.QPushButton("Show Grayscale4")
-        self.pushButton4.clicked.connect(self.unCheck)
+        self.pushButton4 = qtw.QPushButton("Grab")
         self.pushButton4.setCheckable(True)
         self.pushButton4.setChecked(False)
         self.pushButton4.setObjectName("pushButton4")
@@ -249,7 +229,8 @@ class AppWindow (qtw.QMainWindow, MyFont):
         self.box2_grid.addStretch(1)
         self.box2.setLayout(self.box2_grid)
 
-        self.page_1_grid = qtw.QGridLayout(self.page_1)
+        self.page_1_grid = qtw.QGridLayout(
+            self.tool_panel.toolbox_page["Image Information"])
         self.page_1_grid.setObjectName("Page 1 Grid")
         self.page_1_grid.addWidget(self.color_box, 1, 1)
         self.page_1_grid.addWidget(self.box2, 2, 1)
@@ -269,30 +250,9 @@ class AppWindow (qtw.QMainWindow, MyFont):
 
         self.BuildToolbar()
 
-
         # End UI code
         self.show()
 
-    """def paintEvent(self,event):
-        qp = qtg.QPainter()
-        qp.begin(self)
-        #self.image_dispaly.drawRectangles(qp)
-        
-
-    #def drawRectangles(self, qp):
-        col = qtg.QColor(0, 0, 0)
-        col.setNamedColor('#d4d4d4')
-        qp.setPen(col)
-
-        qp.setBrush(qtg.QColor(200, 0, 0))
-        qp.drawRect(10, 15, 90, 60)
-
-        qp.setBrush(qtg.QColor(255, 80, 0, 160))
-        qp.drawRect(130, 15, 90, 60)
-
-        qp.setBrush(qtg.QColor(25, 0, 90, 200))
-        qp.drawRect(250, 15, 90, 60)
-        qp.end()"""
     # Tool Bar
 
     def BuildToolbar(self):
@@ -360,54 +320,86 @@ class AppWindow (qtw.QMainWindow, MyFont):
         data.save('temp_image_grayscale.png')
         self.image_dispaly.setPhoto(qtg.QPixmap('temp_image_grayscale.png'))
 
-    def grabCut(self,pos):
+    def kMeans(self):
+
+        image = cv.imread('temp_image_original.png')
+
+        Z = image.reshape((-1, 3))
+        # convert to np.float32
+        Z = np.float32(Z)
+        # define criteria, number of clusters(K) and apply kmeans()
+        criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 10, 1.0)
+        K = 4
+        ret, label, center = cv.kmeans(
+            Z, K, None, criteria, 10, cv.KMEANS_RANDOM_CENTERS)
+        # Now convert back into uint8, and make original image
+        center = np.uint8(center)
+        res = center[label.flatten()]
+        res2 = res.reshape((image.shape))
+
+        # Save image
+        data = im.fromarray(res2)
+        data.save('temp_image_kmenas.png')
+        self.image_dispaly.setPhoto(qtg.QPixmap('temp_image_kmenas.png'))
+
+    def grabCut(self, pos):
 
         if self.image_dispaly.dragMode() == qtw.QGraphicsView.NoDrag:
-            if self.pushButton4.isChecked():     
+            if self.pushButton4.isChecked():
                 print(pos.x()-100, pos.y()-100, 200, 200)
                 image = cv.imread('temp_image_original.png')
                 #
+                print('grab')
 
                 img_ivert = cv.bitwise_not(image)
-                mask = np.zeros(img_ivert.shape[:2],np.uint8)
+                mask = np.zeros(img_ivert.shape[:2], np.uint8)
 
                 # Background and foreground models
-                bgdModel = np.zeros((1,65),np.float64)
-                fgdModel = np.zeros((1,65),np.float64)
-                # Rectangle of semi ROI - manual select 
+                bgdModel = np.zeros((1, 65), np.float64)
+                fgdModel = np.zeros((1, 65), np.float64)
+                # Rectangle of semi ROI - manual select
                 rect = (pos.x()-100, pos.y()-100, 200, 200)
 
                 # start sectioning
-                cv.grabCut(img_ivert,mask,rect,bgdModel,fgdModel,20,cv.GC_INIT_WITH_RECT)
+                cv.grabCut(img_ivert, mask, rect, bgdModel,
+                           fgdModel, 20, cv.GC_INIT_WITH_RECT)
 
-                # Definite background and probable background 
-                mask2 = np.where((mask==2)|(mask==0),0,1).astype('uint8')
-                image_grabcut = img_ivert*mask2[:,:,np.newaxis]
+                # Definite background and probable background
+                mask2 = np.where((mask == 2) | (
+                    mask == 0), 0, 1).astype('uint8')
+                image_grabcut = img_ivert*mask2[:, :, np.newaxis]
 
-                #
+                # Save image
                 data = im.fromarray(image_grabcut)
                 data.save('temp_image_grabcut.png')
-                self.image_dispaly.setPhoto(qtg.QPixmap('temp_image_grabcut.png'))
+                self.image_dispaly.setPhoto(
+                    qtg.QPixmap('temp_image_grabcut.png'))
 
     # Clicked
     def photoClicked(self, pos):
         if self.image_dispaly.dragMode() == qtw.QGraphicsView.NoDrag:
             self.pixPosInfo.setText('%d, %d' % (pos.x(), pos.y()))
 
+            print(self._temporary_position)
+            self._temporary_position.append(pos.x())
+            self._temporary_position.append(pos.y())
+
+            print('%d, %d' % (pos.x(), pos.y()))
+
             image = None
             image = cv.imread('temp_image_original.png')
 
-            if image.any():       
+            if image.any():
                 valueblue = image[pos.y(), pos.x(), 0]
                 valuegreen = image[pos.y(), pos.x(), 1]
                 valuered = image[pos.y(), pos.x(), 2]
                 self.pixValueInfo.setText('%d, %d, %d' %
-                                      (valuegreen, valueblue, valuered))
+                                          (valuegreen, valueblue, valuered))
             else:
                 pass
 
     def addRoiLable(self, pos):
- 
+
         flaw_frame = qtg.QPen()
         flaw_frame.setStyle(qtc.Qt.DashLine)
         flaw_frame.setWidth(3)
@@ -431,15 +423,12 @@ class AppWindow (qtw.QMainWindow, MyFont):
                 labelka.setPos(pos.x()+100, pos.y())
                 labelka.setText("Labelka")
                 self.image_dispaly._scene.addItem(labelka)
-    
-    def clickInteraction(self,pos):
-        pass
-    
+
     def unCheck(self):
-        buttons = [self.pushButton,self.pushButton2,self.pushButton3,self.pushButton4]
+        buttons = [self.pushButton, self.pushButton2,
+                   self.pushButton3, self.pushButton4]
         for i in buttons:
             i.setChecked(False)
-
 
     """Toolbar Functions"""
 

@@ -6,6 +6,16 @@
 
 *files/temp_image.png
 *files/test.py
+*files/test2.py
+*files/test3.py
+*files/test4.py
+*files/test5.py
+*threadtest.py
+*SkipView.py
+
+# IGNORE EXTENSIONS
+
+*.png
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
