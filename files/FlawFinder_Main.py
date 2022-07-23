@@ -297,6 +297,8 @@ class AppWindow (qtw.QMainWindow, MyFont):
                 sys.exit()
             self.image_dispaly.setPhoto(qtg.QPixmap(fname[0]))
 
+            print(self.tool_panel.pages[0].pixel_value)
+
     # Menu - File - Save
     def saveFile(self):
         filePath, _ = qtw.QFileDialog.getSaveFileName(self, "Save Image", "",
@@ -380,7 +382,7 @@ class AppWindow (qtw.QMainWindow, MyFont):
     # Clicked
     def photoClicked(self, pos):
         if self.image_dispaly.dragMode() == qtw.QGraphicsView.NoDrag:
-            self.pixPosInfo.setText('%d, %d' % (pos.x(), pos.y()))
+            self.tool_panel.pages[0].pixel_coordinates.setText('%d, %d' % (pos.x(), pos.y()))
 
             print(self._temporary_position)
             self._temporary_position.append(pos.x())
@@ -395,8 +397,7 @@ class AppWindow (qtw.QMainWindow, MyFont):
                 valueblue = image[pos.y(), pos.x(), 0]
                 valuegreen = image[pos.y(), pos.x(), 1]
                 valuered = image[pos.y(), pos.x(), 2]
-                self.pixValueInfo.setText('%d, %d, %d' %
-                                          (valuegreen, valueblue, valuered))
+                self.tool_panel.pages[0].pixel_value.setText('%d, %d, %d' %(valuegreen, valueblue, valuered))
             else:
                 pass
 
