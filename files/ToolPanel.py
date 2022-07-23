@@ -1,7 +1,9 @@
 import sys
 
-from PyQt5.QtWidgets import QApplication, QWidget, QToolBox
+from PyQt5.QtWidgets import QWidget, QToolBox
 from PyQt5.QtCore import QRect
+
+from PanelPage import InfoPage
 
 
 class ToolPanelPage(QWidget):
@@ -21,7 +23,7 @@ class ToolPanel(QToolBox):
         self.setObjectName("ToolBox")
         self.setEnabled(True)
 
-        self.pages = [ToolPanelPage(), ToolPanelPage(
+        self.pages = [InfoPage(), ToolPanelPage(), ToolPanelPage(
         ), ToolPanelPage(), ToolPanelPage(), ToolPanelPage()]
 
         page_name = [
@@ -46,6 +48,4 @@ class ToolPanel(QToolBox):
 
 if __name__ == '__main__':
 
-    app = QApplication(sys.argv)
-
-    sys.exit(app.exit)
+    pass
