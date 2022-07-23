@@ -173,7 +173,8 @@ class AppWindow (qtw.QMainWindow, MyFont):
         # self.setLayout(layout)
         """Boxes, Buttons, Sliders, etc."""
         # BOX 1
-        self.color_box = qtw.QGroupBox(self.tool_panel.toolbox_page["Image Information"])
+        self.color_box = qtw.QGroupBox(
+            self.tool_panel.toolbox_page["Color Quantization"])
         self.color_box.setObjectName("color box")
         self.color_box.setTitle("Color based operations")
         self.color_box.setFont(self.calibri_12)
@@ -207,7 +208,8 @@ class AppWindow (qtw.QMainWindow, MyFont):
         self.color_box.setLayout(self.color_box_grid)
 
         # BOX 2
-        self.box2 = qtw.QGroupBox(self.tool_panel.toolbox_page["Image Information"])
+        self.box2 = qtw.QGroupBox(
+            self.tool_panel.toolbox_page["Color Quantization"])
         self.box2.setObjectName("Box")
         self.box2.setTitle("Based operations")
         self.box2.setFont(self.calibri_12)
@@ -230,7 +232,7 @@ class AppWindow (qtw.QMainWindow, MyFont):
         self.box2.setLayout(self.box2_grid)
 
         self.page_1_grid = qtw.QGridLayout(
-            self.tool_panel.toolbox_page["Image Information"])
+            self.tool_panel.toolbox_page["Color Quantization"])
         self.page_1_grid.setObjectName("Page 1 Grid")
         self.page_1_grid.addWidget(self.color_box, 1, 1)
         self.page_1_grid.addWidget(self.box2, 2, 1)
