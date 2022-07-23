@@ -18,7 +18,7 @@ class InfoPage(QWidget):
         self.pixel_coordinates.setReadOnly(True)
         self.pixel_coordinates.setObjectName("PixelPositionCoordinates")
 
-        pixel_coordinates_label = QLabel("Pix")
+        pixel_coordinates_label = QLabel("Pixel")
 
         self.pixel_value = QLineEdit("Values Info")
         self.pixel_value.setReadOnly(True)

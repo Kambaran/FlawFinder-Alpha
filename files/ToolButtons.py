@@ -21,7 +21,7 @@ _fininview.setStyleSheet("border :1px solid white")
 _fininview.setFixedSize(bw, bw)
 _fininview.setIconSize(QSize(iw, iw))
 _fininview.setIcon(QIcon(":/icons/fit.png"))
-_fininview.setToolTip("Fit button resizes image view to the scene size")
+_fininview.setToolTip("Fit button resizes image view to the screne size")
 
 # Drag Button
 _dragbutton = QToolButton()

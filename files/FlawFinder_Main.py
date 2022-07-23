@@ -158,7 +158,7 @@ class AppWindow (qtw.QMainWindow, MyFont):
         self.left_dock.setMinimumWidth(300)
 
         # Right Dockable
-        self.right_dock = qtw.QDockWidget("Operation Log", self)
+        self.right_dock = qtw.QDockWidget("Operations Log", self)
         self.right_dock.setFont(self.calibri_16)
         self.right_dock.setWidget(self.operations)
         self.right_dock.setFloating(False)

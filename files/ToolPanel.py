@@ -3,6 +3,7 @@ import sys
 from PyQt5.QtWidgets import QWidget, QToolBox
 from PyQt5.QtCore import QRect
 
+
 from PanelPage import InfoPage
 
 
