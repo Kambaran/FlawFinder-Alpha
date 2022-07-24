@@ -24,7 +24,10 @@ class ToolPanel(QToolBox):
         self.setObjectName("ToolBox")
         self.setEnabled(True)
 
-        self.pages = [InfoPage(), KmeansPage(), ToolPanelPage(
+        self.page_0 = InfoPage()
+        self.page_1 = KmeansPage ()
+
+        self.pages = [self.page_0,self.page_1, ToolPanelPage(
         ), ToolPanelPage(), ToolPanelPage(), ToolPanelPage()]
 
         page_name = [

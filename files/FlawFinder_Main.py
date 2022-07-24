@@ -1,5 +1,5 @@
 import sys
-import os 
+import os
 import cv2 as cv
 import qdarktheme
 import numpy as np
@@ -139,8 +139,8 @@ class AppWindow (qtw.QMainWindow, MyFont):
         self.image_dispaly = ImageViewer(self)
         self.image_dispaly.setGeometry(qtc.QRect(0, 0, 40, 100))
         self.image_dispaly.photoClicked.connect(self.photoClicked)
-        self.image_dispaly.photoClicked.connect(self.grabCut)
-        self.image_dispaly.clickRelesd.connect(self.addRoiLable)
+        #self.image_dispaly.photoClicked.connect(self.grabCut)
+        #self.image_dispaly.clickRelesd.connect(self.addRoiLable)
 
         # List Display
         self.operations = qtw.QTableView()
@@ -156,7 +156,7 @@ class AppWindow (qtw.QMainWindow, MyFont):
         self.left_dock.setFont(self.calibri_16)
         self.left_dock.setWidget(self.tool_panel)
         self.left_dock.setFloating(False)
-        self.left_dock.setMinimumWidth(300)
+        self.left_dock.setMinimumWidth(320)
 
         # Right Dockable
         self.right_dock = qtw.QDockWidget("Operations Log", self)
@@ -168,75 +168,6 @@ class AppWindow (qtw.QMainWindow, MyFont):
         self.setCentralWidget(self.image_dispaly)
         self.addDockWidget(qtc.Qt.RightDockWidgetArea, self.right_dock)
         self.addDockWidget(qtc.Qt.LeftDockWidgetArea, self.left_dock)
-
-        # Main Layout
-        #layout = qtw.QGridLayout()
-        # self.setLayout(layout)
-        """Boxes, Buttons, Sliders, etc."""
-        # BOX 1
-        self.color_box = qtw.QGroupBox(
-            self.tool_panel.toolbox_page["Color Quantization"])
-        self.color_box.setObjectName("color box")
-        self.color_box.setTitle("Color based operations")
-        self.color_box.setFont(self.calibri_12)
-
-        self.pushButton = qtw.QPushButton("Aply Grayscale")
-        self.pushButton.clicked.connect(self.unCheck)
-        self.pushButton.setChecked(True)
-        self.pushButton.setChecked(False)
-        self.pushButton.setObjectName("pushButton")
-
-        self.pushButton2 = qtw.QPushButton("Show pixel info")
-        self.pushButton2.clicked.connect(self.unCheck)
-        self.pushButton2.setCheckable(True)
-        self.pushButton2.setChecked(False)
-        self.pushButton2.setObjectName("pushButton2")
-
-        self.pixPosInfo = qtw.QLineEdit("Position Info")
-        self.pixPosInfo.setReadOnly(True)
-        self.pixPosInfo.setObjectName("Position info")
-
-        self.pixValueInfo = qtw.QLineEdit("Value Info")
-        self.pixValueInfo.setReadOnly(True)
-        self.pixValueInfo.setObjectName("Value info")
-
-        self.color_box_grid = qtw.QVBoxLayout()
-        self.color_box_grid.addWidget(self.pushButton)
-        self.color_box_grid.addWidget(self.pushButton2)
-        self.color_box_grid.addWidget(self.pixPosInfo)
-        self.color_box_grid.addWidget(self.pixValueInfo)
-        self.color_box_grid.addStretch(1)
-        self.color_box.setLayout(self.color_box_grid)
-
-        # BOX 2
-        self.box2 = qtw.QGroupBox(
-            self.tool_panel.toolbox_page["Color Quantization"])
-        self.box2.setObjectName("Box")
-        self.box2.setTitle("Based operations")
-        self.box2.setFont(self.calibri_12)
-
-        self.pushButton3 = qtw.QPushButton("Draw description")
-        self.pushButton3.clicked.connect(self.kMeans)
-        self.pushButton3.setCheckable(True)
-        self.pushButton3.setChecked(False)
-        self.pushButton3.setObjectName("pushButton3")
-
-        self.pushButton4 = qtw.QPushButton("Grab")
-        self.pushButton4.setCheckable(True)
-        self.pushButton4.setChecked(False)
-        self.pushButton4.setObjectName("pushButton4")
-
-        self.box2_grid = qtw.QVBoxLayout()
-        self.box2_grid.addWidget(self.pushButton3)
-        self.box2_grid.addWidget(self.pushButton4)
-        self.box2_grid.addStretch(1)
-        self.box2.setLayout(self.box2_grid)
-
-        self.page_1_grid = qtw.QGridLayout(
-            self.tool_panel.toolbox_page["Color Quantization"])
-        self.page_1_grid.setObjectName("Page 1 Grid")
-        self.page_1_grid.addWidget(self.color_box, 1, 1)
-        self.page_1_grid.addWidget(self.box2, 2, 1)
 
         # Menubar Construct
         menubar = self.menuBar()
@@ -295,14 +226,18 @@ class AppWindow (qtw.QMainWindow, MyFont):
             size = os.path.getsize(fname[0])
             name = os.path.basename(fname[0])
             image = cv.imread(fname[0])
+
             data = im.fromarray(image)
             data.save('temp_image_original.png')
+
             if fname[0].lower().endswith(('.tiff', '.bmp')):
                 sys.exit()
+                
             self.image_dispaly.setPhoto(qtg.QPixmap(fname[0]))
-            self.tool_panel.pages[0].loaded_image_name.setText(str(name))
-            self.tool_panel.pages[0].loaded_image_resolution.setText(str(image.shape))
-            self.tool_panel.pages[0].loaded_image_size.setText(str(size))
+            self.tool_panel.page_0.loaded_image_name.setText(str(name))
+            self.tool_panel.page_0.loaded_image_resolution.setText(
+                str(image.shape))
+            self.tool_panel.page_0.loaded_image_size.setText(str(size))
 
     # Menu - File - Save
     def saveFile(self):
@@ -313,7 +248,7 @@ class AppWindow (qtw.QMainWindow, MyFont):
         pixmap = qtg.QPixmap(self.image_dispaly.viewport().size())
         self.image_dispaly.viewport().render(pixmap)
         pixmap.save(filePath)
-
+    """
     # Grayscale Conversion
     def convertToGray(self):
 
@@ -328,7 +263,7 @@ class AppWindow (qtw.QMainWindow, MyFont):
         data = im.fromarray(image_RGB)
         data.save('temp_image_grayscale.png')
         self.image_dispaly.setPhoto(qtg.QPixmap('temp_image_grayscale.png'))
-
+    """
     def kMeans(self):
 
         image = cv.imread('temp_image_original.png')
@@ -350,7 +285,7 @@ class AppWindow (qtw.QMainWindow, MyFont):
         data = im.fromarray(res2)
         data.save('temp_image_kmenas.png')
         self.image_dispaly.setPhoto(qtg.QPixmap('temp_image_kmenas.png'))
-
+    """
     def grabCut(self, pos):
 
         if self.image_dispaly.dragMode() == qtw.QGraphicsView.NoDrag:
@@ -383,11 +318,13 @@ class AppWindow (qtw.QMainWindow, MyFont):
                 data.save('temp_image_grabcut.png')
                 self.image_dispaly.setPhoto(
                     qtg.QPixmap('temp_image_grabcut.png'))
+    """
 
     # Clicked
     def photoClicked(self, pos):
         if self.image_dispaly.dragMode() == qtw.QGraphicsView.NoDrag:
-            self.tool_panel.pages[0].pixel_coordinates.setText('%d, %d' % (pos.x(), pos.y()))
+            self.tool_panel.page_0.pixel_coordinates.setText(
+                '%d, %d' % (pos.x(), pos.y()))
 
             print(self._temporary_position)
             self._temporary_position.append(pos.x())
@@ -402,10 +339,11 @@ class AppWindow (qtw.QMainWindow, MyFont):
                 valueblue = image[pos.y(), pos.x(), 0]
                 valuegreen = image[pos.y(), pos.x(), 1]
                 valuered = image[pos.y(), pos.x(), 2]
-                self.tool_panel.pages[0].pixel_value.setText('%d, %d, %d' %(valuegreen, valueblue, valuered))
+                self.tool_panel.page_0.pixel_value.setText(
+                    '%d, %d, %d' % (valuegreen, valueblue, valuered))
             else:
                 pass
-
+    """
     def addRoiLable(self, pos):
 
         flaw_frame = qtg.QPen()
@@ -431,13 +369,7 @@ class AppWindow (qtw.QMainWindow, MyFont):
                 labelka.setPos(pos.x()+100, pos.y())
                 labelka.setText("Labelka")
                 self.image_dispaly._scene.addItem(labelka)
-
-    def unCheck(self):
-        buttons = [self.pushButton, self.pushButton2,
-                   self.pushButton3, self.pushButton4]
-        for i in buttons:
-            i.setChecked(False)
-
+    """
     """Toolbar Functions"""
 
     # Scene - FitIn
