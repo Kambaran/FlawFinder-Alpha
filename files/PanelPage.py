@@ -7,12 +7,45 @@ class InfoPage(QWidget):
     def __init__(self):
         super(InfoPage, self).__init__()
 
+        # Page settings
+
         self.setGeometry(QRect(0, 0, 0, 0))
         self.setObjectName("InfoPanelPage")
 
+        # Image info
+
+        self.loaded_image_name = QLineEdit("Loaded Image")
+        self.loaded_image_name.setReadOnly(True)
+        self.loaded_image_name.setObjectName("ImageNameLine")
+
+        image_name = QLabel("File Name")
+
+        self.loaded_image_resolution = QLineEdit("Image Resolution")
+        self.loaded_image_resolution.setReadOnly(True)
+        self.loaded_image_resolution.setObjectName("ImageResolutionLine")
+
+        image_resolution = QLabel("Image Resolution")
+
+        self.loaded_image_size = QLineEdit("Image Size")
+        self.loaded_image_size.setReadOnly(True)
+        self.loaded_image_size.setObjectName("ImageSizeLine")
+
+        image_size = QLabel("Image Size (bytes)")
+
+        image_image_box_layout = QGridLayout()
+        image_image_box_layout.addWidget(self.loaded_image_name,0,0,1,1)
+        image_image_box_layout.addWidget(image_name,0,1,1,1)
+        image_image_box_layout.addWidget(self.loaded_image_resolution,1,0,1,1)
+        image_image_box_layout.addWidget(image_resolution,1,1,1,1)
+        image_image_box_layout.addWidget(self.loaded_image_size,2,0,1,1)
+        image_image_box_layout.addWidget(image_size,2,1,1,1)
+
         image_info_box = QGroupBox(self)
         image_info_box.setObjectName("InfoGroupBox")
-        image_info_box.setTitle("Image Information")
+        image_info_box.setTitle("Loaded Image Information")
+        image_info_box.setLayout(image_image_box_layout)
+
+        # Pixels info
 
         self.pixel_coordinates = QLineEdit("Position Info")
         self.pixel_coordinates.setReadOnly(True)
@@ -37,6 +70,8 @@ class InfoPage(QWidget):
         pixel_info_box.setTitle("Pixel Information")
         pixel_info_box.setLayout(pixel_info_box_layout)
 
+        # Page layout
+
         spacer = QWidget()
         spacer.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
 
@@ -46,6 +81,13 @@ class InfoPage(QWidget):
         info_page_layout.addWidget(pixel_info_box)
         info_page_layout.addWidget(spacer)
 
+class KmeansPage(QWidget):
+
+    def __init__(self):
+        super(KmeansPage, self).__init__()
+
+        self.setGeometry(QRect(0, 0, 0, 0))
+        self.setObjectName("KmeansPanelPage")
 
 if __name__ == '__main__':
 

@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import QWidget, QToolBox
 from PyQt5.QtCore import QRect
 
 
-from PanelPage import InfoPage
+from PanelPage import InfoPage, KmeansPage
 
 
 class ToolPanelPage(QWidget):
@@ -24,7 +24,7 @@ class ToolPanel(QToolBox):
         self.setObjectName("ToolBox")
         self.setEnabled(True)
 
-        self.pages = [InfoPage(), ToolPanelPage(), ToolPanelPage(
+        self.pages = [InfoPage(), KmeansPage(), ToolPanelPage(
         ), ToolPanelPage(), ToolPanelPage(), ToolPanelPage()]
 
         page_name = [

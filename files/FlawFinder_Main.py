@@ -1,4 +1,5 @@
 import sys
+import os 
 import cv2 as cv
 import qdarktheme
 import numpy as np
@@ -129,7 +130,7 @@ class AppWindow (qtw.QMainWindow, MyFont):
         super(AppWindow, self).__init__()
 
         # Main Window
-        self.setWindowTitle("Flow Finder")
+        self.setWindowTitle("Flaw Finder")
         self.resize(1920, 1080)
         self.main_dispaly = qtw.QWidget()
 
@@ -291,13 +292,17 @@ class AppWindow (qtw.QMainWindow, MyFont):
         if not fname[0]:
             pass
         else:
-            data = im.fromarray(cv.imread(fname[0]))
+            size = os.path.getsize(fname[0])
+            name = os.path.basename(fname[0])
+            image = cv.imread(fname[0])
+            data = im.fromarray(image)
             data.save('temp_image_original.png')
             if fname[0].lower().endswith(('.tiff', '.bmp')):
                 sys.exit()
             self.image_dispaly.setPhoto(qtg.QPixmap(fname[0]))
-
-            print(self.tool_panel.pages[0].pixel_value)
+            self.tool_panel.pages[0].loaded_image_name.setText(str(name))
+            self.tool_panel.pages[0].loaded_image_resolution.setText(str(image.shape))
+            self.tool_panel.pages[0].loaded_image_size.setText(str(size))
 
     # Menu - File - Save
     def saveFile(self):
