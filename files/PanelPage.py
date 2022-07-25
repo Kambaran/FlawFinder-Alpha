@@ -1,5 +1,5 @@
-from PyQt5.QtWidgets import QWidget, QGroupBox, QLineEdit, QVBoxLayout, QGridLayout, QLabel, QSizePolicy, QRadioButton
-from PyQt5.QtCore import QRect, pyqtSignal
+from PyQt5.QtWidgets import QWidget, QGroupBox, QLineEdit, QVBoxLayout, QGridLayout, QLabel, QSizePolicy, QRadioButton, QPushButton, QSpinBox
+from PyQt5.QtCore import QRect
 
 
 class InfoPage(QWidget):
@@ -85,8 +85,6 @@ class InfoPage(QWidget):
 
 class KmeansPage(QWidget):
 
-    temp_image_signal = pyqtSignal(bool)
-
     def __init__(self):
         super(KmeansPage, self).__init__()
 
@@ -95,26 +93,60 @@ class KmeansPage(QWidget):
         self.setObjectName("KmeansPanelPage")
         self.setGeometry(QRect(0, 0, 0, 0))
 
-        #
+        # Image pick
 
         self.current_image_rbutton = QRadioButton("Original Image")
+        self.current_image_rbutton.setChecked(True)
 
         self.temp_image_rbutton = QRadioButton("Temporary Image")
 
-        kmeans_global_layout = QGridLayout()
-        kmeans_global_layout.addWidget(self.current_image_rbutton,0,0,1,1)
-        kmeans_global_layout.addWidget(self.temp_image_rbutton,0,1,1,1)
+        pick_box_layout = QGridLayout()
+        pick_box_layout.addWidget(self.current_image_rbutton, 0, 0, 1, 1)
+        pick_box_layout.addWidget(self.temp_image_rbutton, 0, 1, 1, 1)
 
-        box = QGroupBox("kmeans clustering")
-        box.setLayout(kmeans_global_layout)
+        pick_box = QGroupBox("Imput Image")
+        pick_box.setLayout(pick_box_layout)
+
+        # Kmeans settings
+
+        self.kmeans_clusters = QSpinBox()
+        self.kmeans_clusters.setRange(2, 20)
+
+        kmeans_clusters_label = QLabel("Number of Clusters")
+
+        self.kmeans_iterations = QSpinBox()
+        self.kmeans_iterations.setRange(1, 20)
+        self.kmeans_iterations.setValue(10)
+
+        kmeans_iterations_label = QLabel("Number of Iterations")
+
+        kmeans_settings_layout = QGridLayout()
+        kmeans_settings_layout.addWidget(self.kmeans_clusters, 0, 0, 1, 1)
+        kmeans_settings_layout.addWidget(kmeans_clusters_label, 0, 1, 1, 1)
+        kmeans_settings_layout.addWidget(self.kmeans_iterations, 1, 0, 1, 1)
+        kmeans_settings_layout.addWidget(kmeans_iterations_label, 1, 1, 1, 1)
+
+        kmeans_settings_box = QGroupBox("Clustering Setings")
+        kmeans_settings_box.setLayout(kmeans_settings_layout)
+
+        # Applay kmeans button
+
+        self.kmenas_applay_button = QPushButton("Applay")
+        self.kmenas_applay_button.setCheckable(False)
+        self.kmenas_applay_button.setObjectName("KmeansApplayButton")
+
+        # Page layout
 
         spacer = QWidget()
         spacer.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
 
         kmeans_page_layout = QVBoxLayout(self)
         kmeans_page_layout.setObjectName("")
-        kmeans_page_layout.addWidget(box)
+        kmeans_page_layout.addWidget(pick_box)
+        kmeans_page_layout.addWidget(kmeans_settings_box)
+        kmeans_page_layout.addWidget(self.kmenas_applay_button)
         kmeans_page_layout.addWidget(spacer)
+
 
 if __name__ == '__main__':
 

@@ -1,5 +1,3 @@
-import sys
-
 from PyQt5.QtWidgets import QWidget, QToolBox
 from PyQt5.QtCore import QRect
 
@@ -25,10 +23,14 @@ class ToolPanel(QToolBox):
         self.setEnabled(True)
 
         self.page_0 = InfoPage()
-        self.page_1 = KmeansPage ()
+        self.page_1 = KmeansPage()
+        self.page_2 = ToolPanelPage()
+        self.page_3 = ToolPanelPage()
+        self.page_4 = ToolPanelPage()
+        self.page_5 = ToolPanelPage()
 
-        self.pages = [self.page_0,self.page_1, ToolPanelPage(
-        ), ToolPanelPage(), ToolPanelPage(), ToolPanelPage()]
+        self.pages = [self.page_0, self.page_1, self.page_2,
+                      self.page_3, self.page_4, self.page_5]
 
         page_name = [
             "Image Information",
@@ -38,12 +40,6 @@ class ToolPanel(QToolBox):
             "Simple Blob Detector",
             "Labeling",
         ]
-
-        """Alternative
-        self.toolbox_page = {n: pages for n in page_name}
-        for keys, vals in self.toolbox_page.items():
-            self.addItem(vals, keys)
-        """
 
         self.toolbox_page = {i: j for (j, i) in zip(self.pages, page_name)}
         for keys, vals in self.toolbox_page.items():

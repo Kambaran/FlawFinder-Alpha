@@ -139,8 +139,8 @@ class AppWindow (qtw.QMainWindow, MyFont):
         self.image_dispaly = ImageViewer(self)
         self.image_dispaly.setGeometry(qtc.QRect(0, 0, 40, 100))
         self.image_dispaly.photoClicked.connect(self.photoClicked)
-        #self.image_dispaly.photoClicked.connect(self.grabCut)
-        #self.image_dispaly.clickRelesd.connect(self.addRoiLable)
+        # self.image_dispaly.photoClicked.connect(self.grabCut)
+        # self.image_dispaly.clickRelesd.connect(self.addRoiLable)
 
         # List Display
         self.operations = qtw.QTableView()
@@ -149,7 +149,8 @@ class AppWindow (qtw.QMainWindow, MyFont):
 
         # Tool Panel
         self.tool_panel = ToolPanel()
-        self.tool_panel.setFont(self.calibri_16)
+        self.tool_panel.page_1.kmenas_applay_button.clicked.connect(
+            self.kMeans)
 
         # Left Dockable
         self.left_dock = qtw.QDockWidget("ToolBox", self)
@@ -232,7 +233,7 @@ class AppWindow (qtw.QMainWindow, MyFont):
 
             if fname[0].lower().endswith(('.tiff', '.bmp')):
                 sys.exit()
-                
+
             self.image_dispaly.setPhoto(qtg.QPixmap(fname[0]))
             self.tool_panel.page_0.loaded_image_name.setText(str(name))
             self.tool_panel.page_0.loaded_image_resolution.setText(
@@ -264,27 +265,47 @@ class AppWindow (qtw.QMainWindow, MyFont):
         data.save('temp_image_grayscale.png')
         self.image_dispaly.setPhoto(qtg.QPixmap('temp_image_grayscale.png'))
     """
+
     def kMeans(self):
 
-        image = cv.imread('temp_image_original.png')
+        if self.tool_panel.page_1.current_image_rbutton.isChecked():
+            image = cv.imread('temp_image_original.png')
+        else:
+            image = cv.imread('temp_image_modified.png')
+            image = cv.cvtColor(image, cv.COLOR_RGB2BGR)
 
-        Z = image.reshape((-1, 3))
-        # convert to np.float32
-        Z = np.float32(Z)
-        # define criteria, number of clusters(K) and apply kmeans()
-        criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 10, 1.0)
-        K = 4
-        ret, label, center = cv.kmeans(
-            Z, K, None, criteria, 10, cv.KMEANS_RANDOM_CENTERS)
-        # Now convert back into uint8, and make original image
-        center = np.uint8(center)
-        res = center[label.flatten()]
-        res2 = res.reshape((image.shape))
+        if not image.all() == None:
+            clusters = self.tool_panel.page_1.kmeans_clusters.value()
+            iterations = self.tool_panel.page_1.kmeans_clusters.value()
 
-        # Save image
-        data = im.fromarray(res2)
-        data.save('temp_image_kmenas.png')
-        self.image_dispaly.setPhoto(qtg.QPixmap('temp_image_kmenas.png'))
+            array = image.reshape((-1, 3))
+            # Convert pixels to float32
+            array = np.float32(array)
+
+            # Function
+            criteria = (cv.TERM_CRITERIA_EPS +
+                        cv.TERM_CRITERIA_MAX_ITER, iterations, 1.0)
+            ret, label, center = cv.kmeans(
+                array, clusters, None, criteria, 10, cv.KMEANS_RANDOM_CENTERS)
+
+            # Convert to unit8, assemble
+            center = np.uint8(center)
+            centred = center[label.flatten()]
+            output = centred.reshape((image.shape))
+
+            # Save image
+            data = im.fromarray(output)
+            data.save('temp_image_modified.png')
+            self.image_dispaly.setPhoto(qtg.QPixmap('temp_image_modified.png'))
+        else:
+            # Error message
+            message = qtw.QMessageBox()
+            message.setIcon(qtw.QMessageBox.Warning)
+            message.setText("Assertion Error:")
+            message.setInformativeText(
+                "Function was unable to assert image values - Image variable is empty. Try with original image.")
+            message.setWindowTitle("Error")
+            message.exec_()
     """
     def grabCut(self, pos):
 
