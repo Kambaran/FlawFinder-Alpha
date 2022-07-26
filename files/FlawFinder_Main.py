@@ -1,3 +1,4 @@
+from genericpath import exists
 import sys
 import os
 import cv2 as cv
@@ -5,6 +6,7 @@ import qdarktheme
 import numpy as np
 
 from PIL import Image as im
+from types import NoneType
 
 from PyQt5 import QtWidgets as qtw
 from PyQt5 import QtGui as qtg
@@ -143,7 +145,10 @@ class AppWindow (qtw.QMainWindow, MyFont):
         # self.image_dispaly.clickRelesd.connect(self.addRoiLable)
 
         # List Display
-        self.operations = qtw.QTableView()
+        self.operations = qtw.QFileDialog()
+        self.operations.setOption(qtw.QFileDialog.DontUseNativeDialog)
+        self.operations.setWindowFlag(qtc.Qt.Widget)
+        self.operations.setFileMode(qtw.QFileDialog.AnyFile)
         self.operations.setObjectName("Operations Table")
         self.operations.setEnabled(True)
 
@@ -157,7 +162,7 @@ class AppWindow (qtw.QMainWindow, MyFont):
         self.left_dock.setFont(self.calibri_16)
         self.left_dock.setWidget(self.tool_panel)
         self.left_dock.setFloating(False)
-        self.left_dock.setMinimumWidth(320)
+        self.left_dock.setMinimumWidth(400)
 
         # Right Dockable
         self.right_dock = qtw.QDockWidget("Operations Log", self)
@@ -229,7 +234,7 @@ class AppWindow (qtw.QMainWindow, MyFont):
             image = cv.imread(fname[0])
 
             data = im.fromarray(image)
-            data.save('temp_image_original.png')
+            data.save('temp/temp_image_original.png')
 
             if fname[0].lower().endswith(('.tiff', '.bmp')):
                 sys.exit()
@@ -268,44 +273,60 @@ class AppWindow (qtw.QMainWindow, MyFont):
 
     def kMeans(self):
 
-        if self.tool_panel.page_1.current_image_rbutton.isChecked():
-            image = cv.imread('temp_image_original.png')
-        else:
-            image = cv.imread('temp_image_modified.png')
+        original_path = 'temp/temp_image_original.png'
+        modified_path = 'temp/temp_image_modified.png'
+
+        if self.tool_panel.page_1.current_image_rbutton.isChecked() and os.path.exists(original_path):
+            image = cv.imread(original_path)
+        elif self.tool_panel.page_1.temp_image_rbutton.isChecked() and os.path.exists(modified_path):
+            image = cv.imread(modified_path)
             image = cv.cvtColor(image, cv.COLOR_RGB2BGR)
-
-        if not image.all() == None:
-            clusters = self.tool_panel.page_1.kmeans_clusters.value()
-            iterations = self.tool_panel.page_1.kmeans_clusters.value()
-
-            array = image.reshape((-1, 3))
-            # Convert pixels to float32
-            array = np.float32(array)
-
-            # Function
-            criteria = (cv.TERM_CRITERIA_EPS +
-                        cv.TERM_CRITERIA_MAX_ITER, iterations, 1.0)
-            ret, label, center = cv.kmeans(
-                array, clusters, None, criteria, 10, cv.KMEANS_RANDOM_CENTERS)
-
-            # Convert to unit8, assemble
-            center = np.uint8(center)
-            centred = center[label.flatten()]
-            output = centred.reshape((image.shape))
-
-            # Save image
-            data = im.fromarray(output)
-            data.save('temp_image_modified.png')
-            self.image_dispaly.setPhoto(qtg.QPixmap('temp_image_modified.png'))
         else:
-            # Error message
-            message = qtw.QMessageBox()
-            message.setIcon(qtw.QMessageBox.Warning)
-            message.setText("Assertion Error:")
-            message.setInformativeText(
-                "Function was unable to assert image values - Image variable is empty. Try with original image.")
-            message.setWindowTitle("Error")
-            message.exec_()
+            assertionmsg()
+            return
+
+        clusters = self.tool_panel.page_1.kmeans_clusters.value()
+        iterations = self.tool_panel.page_1.kmeans_clusters.value()
+
+        array = image.reshape((-1, 3))
+        # Convert pixels to float32
+        array = np.float32(array)
+
+        # Function
+        criteria = (cv.TERM_CRITERIA_EPS +
+                    cv.TERM_CRITERIA_MAX_ITER, iterations, 1.0)
+        ret, label, center = cv.kmeans(
+            array, clusters, None, criteria, 10, cv.KMEANS_RANDOM_CENTERS)
+
+        # Convert to unit8, assemble
+        center = np.uint8(center)
+        centred = center[label.flatten()]
+        output = centred.reshape((image.shape))
+
+        # Save image
+        data = im.fromarray(output)
+        data.save('temp/temp_image_modified.png')
+        self.image_dispaly.setPhoto(qtg.QPixmap('temp/temp_image_modified.png'))
+
+    def morphology(self):
+
+        original_path = 'temp/temp_image_original.png'
+        modified_path = 'temp/temp_image_modified.png'
+
+        if self.tool_panel.page_2.current_image_rbutton.isChecked() and os.path.exists(original_path):
+            image = cv.imread(original_path)
+        elif self.tool_panel.page_2.temp_image_rbutton.isChecked() and os.path.exists(modified_path):
+            image = cv.imread(modified_path)
+            image = cv.cvtColor(image, cv.COLOR_RGB2BGR)
+        else:
+            assertionmsg()
+            return
+        
+    def grabCut(self):
+        pass
+
+    def SimpleBlob(self):
+        pass
     """
     def grabCut(self, pos):
 
@@ -408,6 +429,16 @@ class AppWindow (qtw.QMainWindow, MyFont):
     # Secene - Rotate Left
     def RotateAntiClockwise(self):
         self.image_dispaly.rotate(-90)
+
+
+def assertionmsg():
+    message = qtw.QMessageBox()
+    message.setIcon(qtw.QMessageBox.Warning)
+    message.setText("Assertion Error:")
+    message.setInformativeText(
+        "Function was unable to assert image values - Image variable is empty. Try with original image.")
+    message.setWindowTitle("Error")
+    message.exec_()
 
 
 if __name__ == '__main__':

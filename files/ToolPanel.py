@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QWidget, QToolBox
 from PyQt5.QtCore import QRect
 
 
-from PanelPage import InfoPage, KmeansPage
+from PanelPage import InfoPage, KmeansPage, MorphologyPage
 
 
 class ToolPanelPage(QWidget):
@@ -24,13 +24,19 @@ class ToolPanel(QToolBox):
 
         self.page_0 = InfoPage()
         self.page_1 = KmeansPage()
-        self.page_2 = ToolPanelPage()
+        self.page_2 = MorphologyPage()
         self.page_3 = ToolPanelPage()
         self.page_4 = ToolPanelPage()
         self.page_5 = ToolPanelPage()
 
-        self.pages = [self.page_0, self.page_1, self.page_2,
-                      self.page_3, self.page_4, self.page_5]
+        self.pages = [
+            self.page_0, 
+            self.page_1, 
+            self.page_2,
+            self.page_3, 
+            self.page_4, 
+            self.page_5
+        ]
 
         page_name = [
             "Image Information",

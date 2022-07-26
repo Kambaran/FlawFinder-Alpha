@@ -141,11 +141,53 @@ class KmeansPage(QWidget):
         spacer.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
 
         kmeans_page_layout = QVBoxLayout(self)
-        kmeans_page_layout.setObjectName("")
+        kmeans_page_layout.setObjectName("KmeansPageLayout")
         kmeans_page_layout.addWidget(pick_box)
         kmeans_page_layout.addWidget(kmeans_settings_box)
         kmeans_page_layout.addWidget(self.kmenas_applay_button)
         kmeans_page_layout.addWidget(spacer)
+
+
+class MorphologyPage(QWidget):
+
+    def __init__(self):
+        super(MorphologyPage, self).__init__()
+
+        # Page settings
+
+        self.setObjectName("MorphologyPanelPage")
+        self.setGeometry(QRect(0, 0, 0, 0))
+
+        # Image pick
+
+        self.current_image_rbutton = QRadioButton("Original Image")
+        self.current_image_rbutton.setChecked(True)
+
+        self.temp_image_rbutton = QRadioButton("Temporary Image")
+
+        pick_box_layout = QGridLayout()
+        pick_box_layout.addWidget(self.current_image_rbutton, 0, 0, 1, 1)
+        pick_box_layout.addWidget(self.temp_image_rbutton, 0, 1, 1, 1)
+
+        pick_box = QGroupBox("Imput Image")
+        pick_box.setLayout(pick_box_layout)
+
+        # Applay morphology button
+
+        self.morphology_applay_button = QPushButton("Applay")
+        self.morphology_applay_button.setCheckable(False)
+        self.morphology_applay_button.setObjectName("MorphologyApplayButton")
+
+        # Page layout
+
+        spacer = QWidget()
+        spacer.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
+
+        morphology_page_layout = QVBoxLayout(self)
+        morphology_page_layout.setObjectName("MorphologyPageLayout")
+        morphology_page_layout.addWidget(pick_box)
+        morphology_page_layout.addWidget(self.morphology_applay_button)
+        morphology_page_layout.addWidget(spacer)
 
 
 if __name__ == '__main__':
